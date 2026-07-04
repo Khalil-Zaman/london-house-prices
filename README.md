@@ -37,6 +37,7 @@ Run: `.venv/bin/python scripts/download_filter.py && .venv/bin/python scripts/an
 | `output/borough_premium_heatmap.png` | Borough × year matrix of the freehold premium (%) |
 | `index.html` + `site/*.json` | Local dashboard (see below) |
 | `overall.html` + `site/overall.json` | Whole-market page: prices vs CPI, S&P 500, NASDAQ-100 |
+| `uk.html` + `site/uk_*.json` | UK-wide page: HPI for every nation/region/district + heatmap |
 
 ## Dashboard
 
@@ -56,6 +57,14 @@ closes, converted to GBP at spot; price return only, no dividends).
 Data prep: `scripts/make_overall_data.py`, which fetches ONS CPI (D7BT) and
 Yahoo Finance (^GSPC, ^NDX, GBPUSD=X) into `data/market/` and writes
 `site/overall.json`.
+
+`uk.html` ("The State of the Nation") covers the whole UK via the official
+UK House Price Index: monthly average price or 12-month % change for the UK,
+four nations, nine English regions and all 360 local-authority districts, plus
+a district-level choropleth (year slider, diverging ramp for rising/falling).
+Data prep: `scripts/make_uk_data.py`, which downloads the newest HPI full-file
+release and ONS LAD-2024 boundaries (Barnsley & Sheffield re-keyed to their
+current GSS codes; Isles of Scilly has no HPI series; NI's index is quarterly).
 
 ## Headline findings
 
