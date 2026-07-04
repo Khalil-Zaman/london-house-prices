@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Leasehold Discount — London House Prices 2006–2026</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23f6efe2'/%3E%3Cpath d='M3 13V6l5-3 5 3v7H9.5V9h-3v4z' fill='%23990f3d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Archivo:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --paper: #f6efe2;
+    --paper-deep: #efe5d2;
+    --ink: #221c18;
+    --ink-soft: #5d5346;
+    --hairline: #cfc2a9;
+    --freehold: #0f5499;
+    --leasehold: #990f3d;
+    --accent-bg: #221c18;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Archivo', sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* paper grain */
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: .35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* masthead */
+  header {
+    border-bottom: 3px double var(--ink);
+    padding: 18px 0 14px;
+  }
+  .masthead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600;
+  }
+  .masthead .dot { color: var(--leasehold); }
+  .masthead a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hairline); }
+  .masthead a:hover { border-bottom-color: var(--ink); }
+
+  /* hero */
+  .hero { padding: 64px 0 36px; border-bottom: 1px solid var(--hairline); }
+  .kicker {
+    font-size: 13px; letter-spacing: .22em; text-transform: uppercase; font-weight: 600;
+    color: var(--leasehold); margin-bottom: 18px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif; font-optical-sizing: auto;
+    font-weight: 560; font-size: clamp(44px, 7.4vw, 84px); line-height: 1.02;
+    letter-spacing: -0.015em; max-width: 14ch;
+  }
+  h1 em { font-style: italic; font-weight: 420; }
+  .standfirst {
+    font-family: 'Fraunces', serif; font-size: 21px; line-height: 1.5; font-weight: 380;
+    color: var(--ink-soft); max-width: 58ch; margin-top: 26px;
+  }
+  .standfirst b { color: var(--ink); font-weight: 600; }
+
+  /* stat band */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .stat { padding: 30px 26px 30px 0; border-right: 1px dotted var(--hairline); }
+  .stat:last-child { border-right: none; }
+  .stat + .stat { padding-left: 26px; }
+  .stat .num {
+    font-family: 'Fraunces', serif; font-size: 44px; font-weight: 600; line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat .num.fh { color: var(--freehold); }
+  .stat .num.lh { color: var(--leasehold); }
+  .stat .lbl { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink-soft); margin-top: 10px; }
+
+  /* sections */
+  section { padding: 56px 0; border-bottom: 1px solid var(--hairline); }
+  .sec-head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 8px; }
+  .fig-no {
+    font-family: 'Spline Sans Mono', monospace; font-size: 12px; font-weight: 600;
+    letter-spacing: .14em; color: var(--paper);
+    background: var(--accent-bg); padding: 4px 9px;
+  }
+  h2 { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 560; letter-spacing: -0.01em; }
+  .sec-sub { color: var(--ink-soft); font-size: 15px; max-width: 70ch; margin-bottom: 28px; }
+
+  /* controls */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    padding: 14px 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--hairline);
+    margin-bottom: 6px;
+  }
+  .controls label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink-soft); }
+  select {
+    font-family: 'Archivo', sans-serif; font-size: 15px; font-weight: 500;
+    background: var(--paper); color: var(--ink);
+    border: 1px solid var(--ink); border-radius: 0; padding: 7px 34px 7px 12px;
+    appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23221c18'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  select:focus { outline: 2px solid var(--freehold); outline-offset: 1px; }
+  .seg { display: inline-flex; border: 1px solid var(--ink); }
+  .seg button {
+    font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: .06em;
+    background: transparent; color: var(--ink); border: none; padding: 8px 16px; cursor: pointer;
+    text-transform: uppercase;
+  }
+  .seg button.active { background: var(--ink); color: var(--paper); }
+  .readout {
+    margin-left: auto; font-family: 'Spline Sans Mono', monospace; font-size: 13px;
+    display: flex; gap: 22px;
+  }
+  .readout .fh { color: var(--freehold); font-weight: 600; }
+  .readout .lh { color: var(--leasehold); font-weight: 600; }
+  .readout .gap { color: var(--ink-soft); }
+
+  .chart-box { position: relative; height: 480px; padding: 18px 0 4px; }
+
+  /* choropleth */
+  input[type=range] {
+    appearance: none; width: 220px; height: 3px; background: var(--ink); cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px; background: var(--leasehold);
+    border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 0 0 1.5px var(--ink);
+  }
+  .year-label { font-family: 'Spline Sans Mono', monospace; font-size: 17px; font-weight: 600; min-width: 3.2ch; }
+  .map-row { display: grid; grid-template-columns: 1fr 240px; gap: 36px; align-items: start; padding-top: 10px; }
+  #map { width: 100%; height: auto; }
+  #map path { stroke: var(--paper); stroke-width: 1.2; transition: fill .35s ease; cursor: crosshair; }
+  #map path:hover { stroke: var(--ink); stroke-width: 1.8; }
+  .legend-bar { height: 14px; border: 1px solid var(--ink); margin-top: 26px; }
+  .legend-ends { display: flex; justify-content: space-between; font-family: 'Spline Sans Mono', monospace; font-size: 12px; margin-top: 6px; }
+  .map-tip {
+    position: fixed; pointer-events: none; display: none; z-index: 50;
+    background: var(--accent-bg); color: var(--paper); padding: 10px 14px;
+    font-size: 13px; line-height: 1.5; max-width: 260px;
+  }
+  .map-tip .tt-name { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+  .map-tip .fh { color: #7db3e8; } .map-tip .lh { color: #e87da3; }
+  @media (max-width: 820px) { .map-row { grid-template-columns: 1fr; } }
+  .footnote { font-size: 12.5px; color: var(--ink-soft); margin-top: 14px; max-width: 80ch; }
+  .footnote b { color: var(--ink); }
+
+  /* figures */
+  figure { margin: 0 0 46px; }
+  figure:last-child { margin-bottom: 0; }
+  figure a { display: block; border: 1px solid var(--hairline); background: #fff; transition: box-shadow .25s ease, transform .25s ease; }
+  figure a:hover { box-shadow: 8px 8px 0 var(--paper-deep), 8px 8px 0 1px var(--hairline); transform: translate(-2px,-2px); }
+  figure img { display: block; width: 100%; height: auto; }
+  figcaption { font-size: 13px; color: var(--ink-soft); padding-top: 12px; max-width: 80ch; }
+  figcaption b { color: var(--ink); text-transform: uppercase; letter-spacing: .1em; font-size: 11.5px; }
+
+  footer { padding: 36px 0 60px; font-size: 13px; color: var(--ink-soft); }
+  footer .rule { border-top: 3px double var(--ink); margin-bottom: 18px; }
+  footer code { font-family: 'Spline Sans Mono', monospace; font-size: 12px; background: var(--paper-deep); padding: 1px 6px; }
+
+  /* load-in */
+  .reveal { opacity: 0; transform: translateY(14px); animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
+  .d1 { animation-delay: .05s } .d2 { animation-delay: .15s } .d3 { animation-delay: .25s }
+  .d4 { animation-delay: .35s } .d5 { animation-delay: .45s }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  @media (max-width: 820px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat { border-right: none; border-bottom: 1px dotted var(--hairline); padding-left: 0 !important; }
+    .readout { margin-left: 0; width: 100%; }
+    .chart-box { height: 380px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="masthead">
+    <span>London House Prices <span class="dot">●</span> Tenure Study</span>
+    <span><a href="overall.html">The Opportunity Cost →</a></span>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <div class="kicker reveal d1">2,039,915 sales · 33 boroughs · 245 months</div>
+  <h1 class="reveal d2">The Leasehold <em>Discount</em></h1>
+  <p class="standfirst reveal d3">
+    Twenty years ago a freehold in London cost <b>23% more</b> than a leasehold.
+    Today the premium is <b>44%</b>. Since 2016, leasehold prices have barely moved —
+    a fall in real terms — while freeholds climbed on. Every registered sale,
+    sliced by tenure and borough.
+  </p>
+</div>
+
+<div class="wrap stats reveal d4">
+  <div class="stat"><div class="num fh">+137%</div><div class="lbl">Freehold median · 20yr</div></div>
+  <div class="stat"><div class="num lh">+102%</div><div class="lbl">Leasehold median · 20yr</div></div>
+  <div class="stat"><div class="num">£633k</div><div class="lbl">Freehold median · 2025</div></div>
+  <div class="stat"><div class="num">£440k</div><div class="lbl">Leasehold median · 2025</div></div>
+</div>
+
+<section class="wrap reveal d5">
+  <div class="sec-head"><span class="fig-no">FIG. 01</span><h2>Explore the monthly series</h2></div>
+  <p class="sec-sub">Precise monthly sale prices by tenure for Greater London and each borough.
+     Faint lines are raw monthly values; bold lines are 12-month centred averages.</p>
+  <div class="controls">
+    <label for="area">Area</label>
+    <select id="area"></select>
+    <div class="seg" id="metric">
+      <button data-v="median" class="active">Median</button>
+      <button data-v="mean">Mean</button>
+    </div>
+    <div class="seg" id="tenureSeg" style="display:none">
+      <button data-v="Freehold" class="active">Freehold</button>
+      <button data-v="Leasehold">Leasehold</button>
+      <button data-v="premium">Premium %</button>
+    </div>
+    <div class="readout" id="readout"></div>
+  </div>
+  <div class="chart-box"><canvas id="chart"></canvas></div>
+  <p class="footnote"><b>Reading note:</b> tenure is heavily confounded with property type —
+     leasehold mostly means flats, freehold mostly houses. The final ~6–12 months are
+     incomplete (registration lag) and will revise upward; the City of London freehold series
+     is a handful of sales per year, so treat it as anecdotal. Standard (category&nbsp;A) sales only.</p>
+</section>
+
+<section class="wrap">
+  <div class="sec-head"><span class="fig-no">FIG. 02</span><h2>The heat across London</h2></div>
+  <p class="sec-sub">Every borough, coloured by price or by the freehold premium. Drag the year slider
+     to watch two decades unfold; hover a borough for the figures.</p>
+  <div class="controls">
+    <div class="seg" id="mapMetric">
+      <button data-v="premium" class="active">Premium %</button>
+      <button data-v="F">Freehold £</button>
+      <button data-v="L">Leasehold £</button>
+    </div>
+    <label for="yearSlider" style="margin-left:8px">Year</label>
+    <input type="range" id="yearSlider" min="2006" max="2026" value="2025" step="1">
+    <span id="yearLabel" class="year-label">2025</span>
+    <div class="readout" id="mapLegend"></div>
+  </div>
+  <div class="map-row">
+    <svg id="map" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="map-side">
+      <div class="legend-bar" id="legendBar"></div>
+      <div class="legend-ends"><span id="legMin"></span><span id="legMax"></span></div>
+      <p class="footnote" style="margin-top:18px">Median price of sales in the selected year.
+         Boroughs turn grey when there are under 30 freehold sales to compare
+         (the City of London, almost every year). 2026 covers January–May only.</p>
+    </div>
+  </div>
+  <div class="map-tip" id="mapTip"></div>
+</section>
+
+<section class="wrap">
+  <div class="sec-head"><span class="fig-no">FIG. 03</span><h2>The plates</h2></div>
+  <p class="sec-sub">Static charts produced by the analysis pipeline. Click any plate to open it full size.</p>
+
+  <figure>
+    <a href="output/london_freehold_vs_leasehold.png" target="_blank"><img src="output/london_freehold_vs_leasehold.png" alt="Greater London mean and median sale price by tenure, 2006–2026" loading="lazy"></a>
+    <figcaption><b>Plate I — The divergence.</b> Greater London mean (top) and median (bottom) sale price.
+      The series part ways decisively after 2016: cladding remediation, escalating service charges and
+      leasehold-reform uncertainty all weigh on the red line.</figcaption>
+  </figure>
+
+  <figure>
+    <a href="output/borough_grid.png" target="_blank"><img src="output/borough_grid.png" alt="Quarterly median price by borough, freehold vs leasehold" loading="lazy"></a>
+    <figcaption><b>Plate II — All 33 boroughs.</b> Quarterly medians, freehold in blue, leasehold in red.
+      The scissors open widest in prime central London; in the outer east the two tenures still travel together.</figcaption>
+  </figure>
+
+  <figure>
+    <a href="output/borough_latest_bars.png" target="_blank"><img src="output/borough_latest_bars.png" alt="Median price by borough over the last twelve months" loading="lazy"></a>
+    <figcaption><b>Plate III — The league table.</b> Median price over the last twelve months.
+      Kensington &amp; Chelsea freeholds change hands at roughly four times their leasehold neighbours.</figcaption>
+  </figure>
+
+  <figure>
+    <a href="output/borough_premium_heatmap.png" target="_blank"><img src="output/borough_premium_heatmap.png" alt="Freehold premium over leasehold by borough and year, heatmap" loading="lazy"></a>
+    <figcaption><b>Plate IV — The premium matrix.</b> The freehold premium over leasehold, every borough,
+      every year. Prime central London has run at 150%+ throughout; the outer east started near
+      parity in 2006 and has been catching up ever since.</figcaption>
+  </figure>
+</section>
+
+<footer class="wrap">
+  <div class="rule"></div>
+  <p>Source: HM Land Registry Price Paid Data (2006 – May 2026), filtered to Greater London, standard sales only;
+     validated against the UK House Price Index (March 2026 release).
+     Pipeline: <code>scripts/download_filter.py</code> → <code>scripts/analyze.py</code> → <code>scripts/make_dashboard_data.py</code>.
+     Contains HM Land Registry data © Crown copyright, licensed under the Open Government Licence v3.0.</p>
+</footer>
+
+<script>
+const FH = getComputedStyle(document.documentElement).getPropertyValue('--freehold').trim();
+const LH = getComputedStyle(document.documentElement).getPropertyValue('--leasehold').trim();
+const INK = getComputedStyle(document.documentElement).getPropertyValue('--ink-soft').trim();
+
+const gbp = v => v == null ? '—' :
+  v >= 1e6 ? '£' + (v/1e6).toFixed(2) + 'm' : '£' + Math.round(v/1000) + 'k';
+
+const ALL = '__ALL__';
+let DATA, chart, area = 'Greater London', metric = 'median', tenureMode = 'Freehold';
+
+function seg(id, onPick) {
+  document.querySelectorAll('#' + id + ' button').forEach(b =>
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#' + id + ' button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      onPick(b.dataset.v);
+    }));
+}
+
+fetch('site/data.json').then(r => r.json()).then(d => {
+  DATA = d;
+  const sel = document.getElementById('area');
+  const all = document.createElement('option');
+  all.value = ALL; all.textContent = '★ All areas — one graph';
+  sel.appendChild(all);
+  d.areas.forEach(a => {
+    const o = document.createElement('option');
+    o.value = o.textContent = a;
+    sel.appendChild(o);
+  });
+  sel.value = 'Greater London';
+  sel.addEventListener('change', () => {
+    area = sel.value;
+    document.getElementById('tenureSeg').style.display = area === ALL ? 'inline-flex' : 'none';
+    update();
+  });
+  seg('metric', v => { metric = v; update(); });
+  seg('tenureSeg', v => { tenureMode = v; update(); });
+  build();
+});
+
+function premiumSeries(s) {
+  const f = s.Freehold[metric + '_roll'], l = s.Leasehold[metric + '_roll'];
+  return f.map((v, i) => (v != null && l[i] != null) ? +((v / l[i] - 1) * 100).toFixed(1) : null);
+}
+
+function compareDatasets() {
+  const base = tenureMode === 'Freehold' ? FH : tenureMode === 'Leasehold' ? LH : '#6b5d4a';
+  const ds = [];
+  DATA.areas.forEach(a => {
+    if (tenureMode === 'premium' && a === 'City Of London') return; // too few freehold sales
+    const s = DATA.series[a], london = a === 'Greater London';
+    const data = tenureMode === 'premium' ? premiumSeries(s) : s[tenureMode][metric + '_roll'];
+    ds.push({
+      label: a, data,
+      borderColor: london ? '#221c18' : base + '59',
+      borderWidth: london ? 2.8 : 1.3,
+      pointRadius: 0, tension: .3, spanGaps: true,
+      order: london ? 0 : 1, baseColor: london ? '#221c18' : base + '59',
+    });
+  });
+  return ds;
+}
+
+function datasets() {
+  if (area === ALL) return compareDatasets();
+  const s = DATA.series[area];
+  const mk = (tenure, color) => ([
+    { label: tenure + ' (12m avg)', data: s[tenure][metric + '_roll'], borderColor: color,
+      borderWidth: 2.4, pointRadius: 0, tension: .3, spanGaps: true, order: 1 },
+    { label: tenure + ' monthly', data: s[tenure][metric], borderColor: color + '40',
+      borderWidth: 1, pointRadius: 0, tension: 0, spanGaps: false, order: 2 },
+  ]);
+  return [...mk('Freehold', FH), ...mk('Leasehold', LH)];
+}
+
+function readout() {
+  const el = document.getElementById('readout');
+  if (area === ALL) {
+    el.innerHTML = '<span class="gap">hover a line — bold is Greater London</span>';
+    return;
+  }
+  const s = DATA.series[area], key = metric + '_roll';
+  const last = arr => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i] != null) return arr[i]; return null; };
+  const f = last(s.Freehold[key]), l = last(s.Leasehold[key]);
+  const gap = (f && l) ? Math.round((f / l - 1) * 100) : null;
+  el.innerHTML =
+    `<span class="fh">FH ${gbp(f)}</span><span class="lh">LH ${gbp(l)}</span>` +
+    (gap != null ? `<span class="gap">premium ${gap}%</span>` : '');
+}
+
+function fmtY(v) {
+  return (area === ALL && tenureMode === 'premium') ? v + '%' : gbp(v);
+}
+
+let hoverIdx = null;
+function applyHover(idx) {
+  if (idx === hoverIdx) return;
+  hoverIdx = idx;
+  chart.data.datasets.forEach((d, i) => {
+    if (d.label === 'Greater London') return;
+    d.borderColor = (idx == null) ? d.baseColor :
+      (i === idx ? d.baseColor.slice(0, 7) : d.baseColor.slice(0, 7) + '14');
+    d.borderWidth = i === idx ? 2.8 : 1.3;
+  });
+  chart.update('none');
+}
+
+function build() {
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: { labels: DATA.months, datasets: datasets() },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 450 },
+      interaction: { mode: 'index', intersect: false },
+      onHover: (e, actives) => {
+        if (area !== ALL) return;
+        applyHover(actives.length ? actives[0].datasetIndex : null);
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: INK, font: { family: 'Archivo', size: 12, weight: 600 },
+            filter: i => i.text.includes('12m'), boxWidth: 22, boxHeight: 2,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#221c18', titleFont: { family: 'Spline Sans Mono' },
+          bodyFont: { family: 'Spline Sans Mono', size: 12 },
+          callbacks: {
+            label: c => ` ${c.dataset.label}: ${fmtY(c.parsed.y)}`,
+            afterBody: items => {
+              if (area === ALL) return '';
+              const i = items[0].dataIndex, s = DATA.series[area];
+              const n = (s.Freehold.n[i] || 0) + (s.Leasehold.n[i] || 0);
+              return n ? `\n ${n.toLocaleString()} sales this month` : '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false }, border: { color: '#221c18' },
+          ticks: {
+            color: INK, font: { family: 'Spline Sans Mono', size: 11 }, maxRotation: 0,
+            autoSkip: false,
+            callback: function (v) {
+              const m = this.getLabelForValue(v);
+              return m.endsWith('-01') && +m.slice(0, 4) % 2 === 0 ? m.slice(0, 4) : null;
+            }
+          }
+        },
+        y: {
+          grid: { color: '#cfc2a955' }, border: { display: false },
+          ticks: { color: INK, font: { family: 'Spline Sans Mono', size: 11 }, callback: v => fmtY(v) }
+        }
+      }
+    }
+  });
+  readout();
+}
+
+function update() {
+  hoverIdx = null;
+  const compare = area === ALL;
+  chart.options.interaction.mode = compare ? 'nearest' : 'index';
+  chart.options.plugins.legend.display = !compare;
+  chart.options.scales.y.min = (compare && tenureMode === 'premium') ? -10 : undefined;
+  chart.data.datasets = datasets();
+  chart.update();
+  readout();
+}
+
+/* ---------- choropleth ---------- */
+const RAMPS = {
+  premium: ['#f6efe2', '#e3a13f', '#990f3d', '#3d0618'],
+  F: ['#f6efe2', '#8fb3d6', '#0f5499', '#062d52'],
+  L: ['#f6efe2', '#d98aa3', '#990f3d', '#3d0618'],
+};
+const GREY = '#d8d2c4', MIN_N = 30;
+let MAP, MD, mapMetric = 'premium', mapYear = 2025;
+
+function lerpHex(a, b, t) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const [r1, g1, b1] = p(a), [r2, g2, b2] = p(b);
+  const c = v => Math.round(v).toString(16).padStart(2, '0');
+  return '#' + c(r1 + (r2 - r1) * t) + c(g1 + (g2 - g1) * t) + c(b1 + (b2 - b1) * t);
+}
+function ramp(stops, t) {
+  t = Math.max(0, Math.min(1, t));
+  const seg = t * (stops.length - 1), i = Math.min(Math.floor(seg), stops.length - 2);
+  return lerpHex(stops[i], stops[i + 1], seg - i);
+}
+
+function mapValue(b, yi) {
+  const d = MD.boroughs[b];
+  if (!d) return null;
+  if (mapMetric === 'premium') {
+    if (d.F[yi] == null || d.L[yi] == null || (d.n_f[yi] || 0) < MIN_N) return null;
+    return (d.F[yi] / d.L[yi] - 1) * 100;
+  }
+  return d[mapMetric][yi];
+}
+
+let domains = null;
+function mapDomains() {
+  domains = { premium: [0, 150] };
+  for (const m of ['F', 'L']) {
+    let vs = [];
+    for (const b of Object.values(MD.boroughs)) vs.push(...b[m].filter(v => v != null));
+    domains[m] = [Math.min(...vs), Math.max(...vs)];
+  }
+}
+function mapT(v) {
+  const [lo, hi] = domains[mapMetric];
+  if (mapMetric === 'premium') return (v - lo) / (hi - lo);
+  return (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo));
+}
+
+function paintMap() {
+  const yi = MD.years.indexOf(mapYear);
+  document.querySelectorAll('#map path').forEach(p => {
+    const v = mapValue(p.dataset.name, yi);
+    p.setAttribute('fill', v == null ? GREY : ramp(RAMPS[mapMetric], mapT(v)));
+  });
+  document.getElementById('yearLabel').textContent = mapYear + (mapYear === 2026 ? '*' : '');
+  const bar = document.getElementById('legendBar');
+  bar.style.background = `linear-gradient(to right, ${RAMPS[mapMetric].join(',')})`;
+  const [lo, hi] = domains[mapMetric];
+  document.getElementById('legMin').textContent = mapMetric === 'premium' ? lo + '%' : gbp(lo);
+  document.getElementById('legMax').textContent = mapMetric === 'premium' ? hi + '%+' : gbp(hi);
+}
+
+function tipHTML(name, yi) {
+  const d = MD.boroughs[name];
+  const f = d.F[yi], l = d.L[yi];
+  const prem = (f != null && l != null && (d.n_f[yi] || 0) >= MIN_N)
+    ? Math.round((f / l - 1) * 100) + '%' : '—';
+  const n = (d.n_f[yi] || 0) + (d.n_l[yi] || 0);
+  return `<div class="tt-name">${name}</div>` +
+    `<span class="fh">FH ${gbp(f)}</span> · <span class="lh">LH ${gbp(l)}</span><br>` +
+    `premium ${prem} · ${n.toLocaleString()} sales in ${mapYear}`;
+}
+
+Promise.all([
+  fetch('site/map_paths.json').then(r => r.json()),
+  fetch('site/map_data.json').then(r => r.json()),
+]).then(([paths, data]) => {
+  MAP = paths; MD = data;
+  mapDomains();
+  const svg = document.getElementById('map');
+  svg.setAttribute('viewBox', MAP.viewBox);
+  const tip = document.getElementById('mapTip');
+  MAP.paths.forEach(p => {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    el.setAttribute('d', p.d);
+    el.dataset.name = p.name;
+    el.addEventListener('mousemove', e => {
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 16) + 'px';
+      tip.style.top = (e.clientY + 16) + 'px';
+      tip.innerHTML = tipHTML(p.name, MD.years.indexOf(mapYear));
+    });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    svg.appendChild(el);
+  });
+  seg('mapMetric', v => { mapMetric = v; paintMap(); });
+  const slider = document.getElementById('yearSlider');
+  slider.addEventListener('input', () => { mapYear = +slider.value; paintMap(); });
+  paintMap();
+});
+</script>
+</body>
+</html>
