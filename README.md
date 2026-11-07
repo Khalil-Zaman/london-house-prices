@@ -9,7 +9,7 @@ across all 33 boroughs (32 boroughs + City of London).
   Freehold/Leasehold flag and district (borough). This is the analysis source:
   the UK HPI full file does *not* contain a tenure split (it has property type,
   new/old, cash/mortgage, buyer status only).
-- **UK HPI full file** (March 2026 release, `data/ukhpi_full.csv`) — used for
+- **UK HPI full file** (August 2026 release, `data/ukhpi_full.csv`) — used for
   validation. Our freehold median tracks the HPI London terraced price and our
   leasehold median tracks the HPI flat price almost exactly at both ends of the
   series.
@@ -17,9 +17,9 @@ across all 33 boroughs (32 boroughs + City of London).
 ## Pipeline
 
 1. `scripts/download_filter.py` — streams the 21 yearly PPD files (2006–2026),
-   keeps Greater London rows → `data/london_ppd.csv` (2.30M sales, 87MB).
+   keeps Greater London rows → `data/london_ppd.csv` (2.34M sales, 89MB).
 2. `scripts/analyze.py` — filters to standard sales (PPD category A), known
-   tenure, prices £10k–£50m (2.04M sales: 930k freehold, 1.110M leasehold),
+   tenure, prices £10k–£50m (2.07M sales: 944k freehold, 1.126M leasehold),
    then aggregates and charts.
 
 Run: `.venv/bin/python scripts/download_filter.py && .venv/bin/python scripts/analyze.py`
@@ -29,7 +29,7 @@ Run: `.venv/bin/python scripts/download_filter.py && .venv/bin/python scripts/an
 | File | Contents |
 |---|---|
 | `output/london_monthly_tenure.csv` | Precise monthly mean/median/count by tenure, London-wide |
-| `output/borough_monthly_tenure.csv` | Same, per borough (33 × 245 months × 2 tenures) |
+| `output/borough_monthly_tenure.csv` | Same, per borough (33 × 249 months × 2 tenures) |
 | `output/borough_quarterly_tenure.csv` | Quarterly version (less noisy for charting) |
 | `output/london_freehold_vs_leasehold.png` | 20-year London series, mean + median |
 | `output/borough_grid.png` | 33-borough small multiples, quarterly medians |
@@ -92,7 +92,7 @@ current GSS codes; Isles of Scilly has no HPI series; NI's index is quarterly).
 - **Tenure is heavily confounded with property type**: leasehold ≈ flats,
   freehold ≈ houses. Much of the divergence is a houses-vs-flats story.
 - **Registration lag**: the last ~6–12 months of Price Paid Data are incomplete,
-  so the tail of the series (late 2025 → May 2026) will revise upward as more
+  so the tail of the series (roughly Mar → Sep 2026) will revise upward as more
   sales register. Don't read the final-months dip as a crash.
 - Category A (standard, full-market-value) sales only; mean is skewed by the
   prime-London tail — prefer the median series.
